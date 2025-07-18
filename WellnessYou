@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<title>แอพแนะนำโภชนาการเฉพาะบุคคล</title>
+<style>
+  body {
+    font-family: 'Sarabun', sans-serif;
+    max-width: 600px;
+    margin: auto;
+    padding: 20px;
+    background: #fffafc;
+    color: #333;
+  }
+  h1 {
+    text-align: center;
+    color: #d81b60;
+  }
+  label, input, select, button {
+    display: block;
+    width: 100%;
+    margin: 10px 0;
+    font-size: 1rem;
+    padding: 8px;
+  }
+  button {
+    background-color: #d81b60;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  .box {
+    background: #fff0f5;
+    border-left: 5px solid #d81b60;
+    padding: 15px;
+    margin-top: 20px;
+    border-radius: 8px;
+  }
+  ul {
+    padding-left: 20px;
+  }
+  li {
+    margin-bottom: 6px;
+  }
+</style>
+</head>
+<body>
+
+<h1>แอพแนะนำโภชนาการเฉพาะบุคคล</h1>
+
+<label for="age">อายุ (ปี):</label>
+<input type="number" id="age" value="17" min="10" max="120" />
+
+<label for="gender">เพศ:</label>
+<select id="gender">
+  <option value="female" selected>หญิง</option>
+  <option value="male">ชาย</option>
+</select>
+
+<label for="height">ส่วนสูง (ซม.):</label>
+<input type="number" id="height" placeholder="เช่น 160" min="100" max="250" />
+
+<label for="weight">น้ำหนัก (กก.):</label>
+<input type="number" id="weight" placeholder="เช่น 50" min="20" max="200" />
+
+<label for="activity">ระดับการออกกำลังกาย:</label>
+<select id="activity">
+  <option value="1.2">น้อยมาก / ไม่ออกกำลังกาย</option>
+  <option value="1.375">ออกกำลังกายเบา ๆ 1-3 วัน/สัปดาห์</option>
+  <option value="1.55">ออกกำลังกายปานกลาง 3-5 วัน/สัปดาห์</option>
+  <option value="1.725">ออกกำลังกายหนัก 6-7 วัน/สัปดาห์</option>
+  <option value="1.9">ออกกำลังกายหนักมาก / งานกายภาพสูง</option>
+</select>
+
+<button onclick="calculateNutrition()">คำนวณและแนะนำ</button>
+
+<div id="result" class="box" style="display:none;"></div>
+
+<script>
+function calculateNutrition() {
+  const age = parseInt(document.getElementById("age").value);
+  const gender = document.getElementById("gender").value;
+  const height = parseFloat(document.getElementById("height").value);
+  const weight = parseFloat(document.getElementById("weight").value);
+  const activity = parseFloat(document.getElementById("activity").value);
+  const result = document.getElementById("result");
+
+  // Validate input
+  if (!age || age < 10 || age > 120) {
+    alert("กรุณากรอกอายุอย่างถูกต้อง");
+    return;
+  }
+  if (!height || height < 100 || height > 250) {
+    alert("กรุณากรอกส่วนสูงอย่างถูกต้อง (100-250 ซม.)");
+    return;
+  }
+  if (!weight || weight < 20 || weight > 200) {
+    alert("กรุณากรอกน้ำหนักอย่างถูกต้อง (20-200 กก.)");
+    return;
+  }
+
+  // คำนวณ BMR ตามสูตร Mifflin-St Jeor
+  // BMR (ผู้หญิง) = 10*น้ำหนัก + 6.25*ส่วนสูง - 5*อายุ - 161
+  // BMR (ผู้ชาย) = 10*น้ำหนัก + 6.25*ส่วนสูง - 5*อายุ + 5
+
+  let bmr;
+  if (gender === "female") {
+    bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+  } else {
+    bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+  }
+
+  // คำนวณ TDEE (Total Daily Energy Expenditure) = BMR * Activity Factor
+  const tdee = Math.round(bmr * activity);
+
+  // แนะนำสัดส่วนอาหาร (ตาม WHO / ADA)
+  const carbsCalories = Math.round(tdee * 0.50); // 50% คาร์บ
+  const proteinCalories = Math.round(tdee * 0.20); // 20% โปรตีน
+  const fatCalories = Math.round(tdee * 0.30); // 30% ไขมัน
+
+  // แปลงเป็นกรัม (คาร์บ/โปรตีน 4 kcal/g, ไขมัน 9 kcal/g)
+  const carbsGram = Math.round(carbsCalories / 4);
+  const proteinGram = Math.round(proteinCalories / 4);
+  const fatGram = Math.round(fatCalories / 9);
+
+  // คำแนะนำเฉพาะป้องกันเบาหวาน
+  const advice = `
+    <ul>
+      <li>เลือกคาร์โบไฮเดรตเชิงซ้อน เช่น ข้าวกล้อง ธัญพืชไม่ขัดสี</li>
+      <li>เน้นโปรตีนคุณภาพดี เช่น ปลา เต้าหู้ ไก่ไม่ติดมัน</li>
+      <li>เพิ่มผักและผลไม้ที่มีไฟเบอร์สูง</li>
+      <li>หลีกเลี่ยงน้ำตาล และเครื่องดื่มหวานทุกชนิด</li>
+      <li>ลดไขมันอิ่มตัวและไขมันทรานส์</li>
+      <li>ดื่มน้ำเปล่าให้เพียงพออย่างน้อย 6-8 แก้ว/วัน</li>
+      <li>ออกกำลังกายสม่ำเสมอ เพื่อควบคุมน้ำหนักและระดับน้ำตาลในเลือด</li>
+    </ul>
+  `;
+
+  result.style.display = "block";
+  result.innerHTML = `
+    <h2>ผลลัพธ์การคำนวณ</h2>
+    <p>พลังงานที่คุณต้องการต่อวัน (TDEE): <b>${tdee} กิโลแคลอรี</b></p>
+    <p>สัดส่วนสารอาหารที่แนะนำ:</p>
+    <ul>
+      <li>คาร์โบไฮเดรต: ${carbsGram} กรัม (ประมาณ 50%)</li>
+      <li>โปรตีน: ${proteinGram} กรัม (ประมาณ 20%)</li>
+      <li>ไขมัน: ${fatGram} กรัม (ประมาณ 30%)</li>
+    </ul>
+    <h3>คำแนะนำเพื่อป้องกันโรคเบาหวาน</h3>
+    ${advice}
+  `;
+}
+</script>
+
+</body>
+</html>
